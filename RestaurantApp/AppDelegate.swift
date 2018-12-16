@@ -26,6 +26,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
+    // calls the load and saved method in MenuController
+    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions:
+        [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool
+    {
+        MenuController.shared.loadOrder()
+        MenuController.shared.loadItems()
+        
+        MenuController.shared.loadRemoteData()
+        
+        return true
+    }
+    
+    // archived state
+    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool
+    {
+        return true
+    }
+    
+    // decides if the archived state is incomaptible with the current version of the app
+    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool
+    {
+        return true
+    }
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
         let temporaryDirectory = NSTemporaryDirectory()
@@ -38,6 +62,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         orderTabBarItem = (self.window!.rootViewController! as!
         UITabBarController).viewControllers![1].tabBarItem
+        
+        updateOrderBadge()
+        
         return true
     }
     
@@ -46,9 +73,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
     }
 
+    // saves the order when app is in background
     func applicationDidEnterBackground(_ application: UIApplication)
     {
-        
+        MenuController.shared.saveOrder()
+        MenuController.shared.saveItems()
     }
 
     func applicationWillEnterForeground(_ application: UIApplication)

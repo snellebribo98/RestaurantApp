@@ -13,29 +13,25 @@ class MenuTableViewController: UITableViewController
 
     let menuController = MenuController()
     var menuItems = [MenuItem]()
-    var category: String!
+    var category: String?
     
     override func viewDidLoad()
     {
         super.viewDidLoad()
         
-        title = category.capitalized
-        MenuController.shared.fetchMenuItems(forCategory: category)
-        { (menuItems) in
-            if let menuItems = menuItems
-            {
-                self.updateUI(with: menuItems)
-            }
-        }
+        NotificationCenter.default.addObserver(self, selector: #selector(updateUI), name: MenuController.menuDataUpdatedNotification, object: nil)
+        
+        updateUI()
     }
     
-    func updateUI(with menuItems: [MenuItem])
+    @objc func updateUI()
     {
-        DispatchQueue.main.async
-            {
-            self.menuItems = menuItems
-            self.tableView.reloadData()
-        }
+        guard let category = category else { return }
+        
+        title = category.capitalized
+        self.menuItems = MenuController.shared.items(forCategory: category) ?? []
+        
+        self.tableView.reloadData()
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
@@ -79,5 +75,22 @@ class MenuTableViewController: UITableViewController
             menuItemDetailViewController.menuItem = menuItems[index]
         }
     }
-
+    
+    // restores view controllers state
+    override func encodeRestorableState(with coder: NSCoder)
+    {
+        super.encodeRestorableState(with: coder)
+        
+        guard let category = category else { return }
+        
+        coder.encode(category, forKey: "category")
+    }
+    
+    override func decodeRestorableState(with coder: NSCoder)
+    {
+        super.decodeRestorableState(with: coder)
+        
+        category = coder.decodeObject(forKey: "category") as? String
+        updateUI()
+    }
 }

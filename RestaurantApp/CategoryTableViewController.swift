@@ -16,12 +16,10 @@ class CategoryTableViewController: UITableViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
-        MenuController.shared.fetchCategories { (categories) in
-            if let categories = categories
-            {
-                self.updateUI(with: categories)
-            }
-        }
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateUI), name: MenuController.menuDataUpdatedNotification, object: nil)
+        
+        updateUI()
     }
     
     override func didReceiveMemoryWarning()
@@ -29,13 +27,10 @@ class CategoryTableViewController: UITableViewController
         super.didReceiveMemoryWarning()
     }
     
-    func updateUI(with categories: [String])
+    @objc func updateUI()
     {
-        DispatchQueue.main.async
-        {
-            self.categories = categories
-            self.tableView.reloadData()
-        }
+        categories = MenuController.shared.categories
+        self.tableView.reloadData()
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int
